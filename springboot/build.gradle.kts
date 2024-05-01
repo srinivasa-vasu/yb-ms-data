@@ -2,10 +2,10 @@
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-    id("org.springframework.boot") version "3.2.3"
+    id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.4"
     id("java")
-    id("org.hibernate.orm") version "6.4.4.Final"
+    id("org.hibernate.orm") version "6.5.0.Final"
     id("org.graalvm.buildtools.native") version "0.10.1"
 }
 
@@ -35,10 +35,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.flywaydb:flyway-core")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("org.springframework.retry:spring-retry")
     implementation("com.yugabyte:jdbc-yugabytedb:42.3.5-yb-4")
-    implementation("org.postgresql:postgresql:42.7.2")
+    implementation("org.postgresql:postgresql:42.7.3")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
