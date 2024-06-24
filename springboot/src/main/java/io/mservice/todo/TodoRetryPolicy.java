@@ -6,6 +6,7 @@ import java.sql.SQLTransientConnectionException;
 
 import jakarta.annotation.PostConstruct;
 
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
@@ -37,13 +38,14 @@ public class TodoRetryPolicy extends ExceptionClassifierRetryPolicy {
 				// - intermittent issues because of a backend failure like connection refused
 				// - hikari connection time out
 				// - 08001, 08003 - connection does not exist (pool connection timeout)
-				if (cause instanceof SQLRecoverableException || cause instanceof SQLTransientConnectionException) {
+				if (cause instanceof SQLRecoverableException || cause instanceof SQLTransientConnectionException ||
+						cause instanceof TransientDataAccessException) {
 					return sp;
 				}
 				else if (cause instanceof SQLException exception) {
 					if ((exception.getSQLState() != null && exception.getSQLState().matches(SQL_STATE))
 							|| (exception.getMessage() != null
-									&& exception.getMessage().toLowerCase().matches(SQL_MSG))) {
+							&& exception.getMessage().toLowerCase().matches(SQL_MSG))) {
 						return sp;
 					}
 				}

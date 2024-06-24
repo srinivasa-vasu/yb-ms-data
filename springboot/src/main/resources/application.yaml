@@ -1,9 +1,15 @@
 spring:
   application:
     name: yb-boot-data
+  threads:
+    virtual:
+      enabled: true
   flyway:
     default-schema: stodo
     schemas: stodo,public
+    table: schema_history_${region}
+    placeholders:
+      alt_region: ${alt_region}
   jpa:
     properties:
       hibernate:
@@ -16,14 +22,17 @@ spring:
     open-in-view: false
   datasource:
     hikari:
-      minimum-idle: 2
-      maximum-pool-size: 2
+      minimum-idle: 10
+      maximum-pool-size: 10
       auto-commit: false
       keepalive-time: 120000
-      connection-init-sql: "set yb_silence_advisory_locks_not_supported_error=on; set search_path=stodo,public; begin; prepare warmup as SELECT 1; execute warmup; commit;"
+      connection-init-sql: "set yb_silence_advisory_locks_not_supported_error=on; set search_path=stodo,public; prepare warmup as SELECT 1; execute warmup; commit;"
       connection-timeout: 5000
       data-source-properties:
         ApplicationName: yb-ms-data
-        socketTimeout: 30
+        socketTimeout: 15
 server:
   port: 8080
+
+locale:
+  zone: 'Asia/Kolkata'

@@ -1,5 +1,6 @@
 package io.mservice.todo;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "todo")
@@ -29,5 +31,8 @@ public class Todo {
 	private String task;
 
 	private boolean status;
+
+	@CreationTimestamp
+	private OffsetDateTime createdAt;
 
 }

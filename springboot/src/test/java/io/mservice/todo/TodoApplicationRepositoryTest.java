@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -25,6 +26,7 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 @AutoConfigureTestDatabase(replace = NONE)
 @Testcontainers
 @ActiveProfiles("test")
+@DisabledInAotMode
 class TodoApplicationRepositoryTest extends AbstractTodoApplicationTest {
 
 	@Configuration

@@ -1,5 +1,7 @@
 package io.mservice.todo;
 
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
@@ -17,6 +20,7 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 @AutoConfigureTestDatabase(replace = NONE)
 @Testcontainers
 @ActiveProfiles("test")
+@DisabledInAotMode
 class TodoApplicationServiceTest extends AbstractTodoApplicationTest {
 
 	@Autowired
@@ -46,7 +50,7 @@ class TodoApplicationServiceTest extends AbstractTodoApplicationTest {
 	}
 
 	@Test
-	void shouldDeleteOneRecord() {
+	void shouldDeleteOneRecord() throws SQLException {
 		final var todo = todoService.save(element);
 		todoService.deleteById(todo.getId());
 		assertThat(todoService.findById(todo.getId()).isEmpty());

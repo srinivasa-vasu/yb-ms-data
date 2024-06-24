@@ -4,6 +4,7 @@ spring:
     url: jdbc:yugabytedb://127.0.0.2:5433,127.0.0.3:5433/yugabyte?load-balance=true&yb-servers-refresh-interval=120
     driver-class-name: com.yugabyte.Driver
     username: yugabyte
+    password: yugabyte
 
 logging:
   level:
