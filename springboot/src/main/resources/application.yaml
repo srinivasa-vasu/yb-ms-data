@@ -19,18 +19,21 @@ spring:
         hbm2ddl:
           extra_physical_table_types: "PARTITIONED TABLE"
           auto: validate
+        dialect: org.hibernate.community.dialect.PostgreSQLLegacyDialect
     open-in-view: false
   datasource:
     hikari:
-      minimum-idle: 10
-      maximum-pool-size: 10
+      minimum-idle: 3
+      maximum-pool-size: 3
       auto-commit: false
-      keepalive-time: 120000
+      keepalive-time: 30000
       connection-init-sql: "set yb_silence_advisory_locks_not_supported_error=on; set search_path=stodo,public; prepare warmup as SELECT 1; execute warmup; commit;"
       connection-timeout: 5000
       data-source-properties:
         ApplicationName: yb-ms-data
         socketTimeout: 15
+#      validation-timeout: 2000
+#      max-lifetime: 120000
 server:
   port: 8080
 

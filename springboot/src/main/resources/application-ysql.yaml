@@ -1,13 +1,14 @@
 spring:
   datasource:
 #    specify at least 2 endpoints
-    url: jdbc:yugabytedb://127.0.0.2:5433,127.0.0.3:5433/yugabyte?load-balance=true&yb-servers-refresh-interval=120
+    url: jdbc:yugabytedb://127.0.0.2:5433/yugabyte?load-balance=true&yb-servers-refresh-interval=120
+#    url: jdbc:yugabytedb://127.0.0.2:5433/yugabyte?options=-cyb_read_from_followers=on -cdefault_transaction_read_only=true&load-balance=true&yb-servers-refresh-interval=120&topology-keys=ybcloud.ap-south-1.ap-south-1
     driver-class-name: com.yugabyte.Driver
     username: yugabyte
     password: yugabyte
 
-logging:
-  level:
-    com.zaxxer.hikari.HikariConfig: DEBUG
-    com.zaxxer.hikari: TRACE
-    com.yugabyte.Driver: TRACE
+#logging:
+#  level:
+#    com.zaxxer.hikari.HikariConfig: DEBUG
+#    com.zaxxer.hikari: TRACE
+#    com.yugabyte.Driver: TRACE

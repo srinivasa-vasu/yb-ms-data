@@ -10,7 +10,7 @@ import com.yugabyte.PGProperty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.hibernate.boot.model.relational.ColumnOrderingStrategyStandard;
-import org.postgresql.util.PGobject;
+import com.yugabyte.util.PGobject;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 

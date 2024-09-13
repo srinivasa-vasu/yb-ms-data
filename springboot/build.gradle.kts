@@ -38,14 +38,16 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.retry:spring-retry")
     implementation("com.yugabyte:jdbc-yugabytedb:42.3.5-yb-6")
-    implementation("org.postgresql:postgresql:42.7.4")
+//    implementation("org.postgresql:postgresql:42.7.4")
+    implementation("org.hibernate.orm:hibernate-community-dialects")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     annotationProcessor("org.projectlombok:lombok")
-//    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+//    runtimeOnly("org.flywaydb:flyway-database-postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
