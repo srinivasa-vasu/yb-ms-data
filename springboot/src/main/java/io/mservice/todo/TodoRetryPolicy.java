@@ -46,20 +46,18 @@ public class TodoRetryPolicy extends ExceptionClassifierRetryPolicy {
 			Optional.ofNullable(exception.getMessage()).map(String::toLowerCase).filter(msg -> msg.matches(SQL_MSG))
 					.isPresent();
 
+	// SQLTransientConnectionException: (08001)|(08003)
+	// - intermittent issues because of a backend failure like connection refused
+	// - hikari connection time out
+	// - 08001, 08003 - connection does not exist (pool connection timeout)
+	private final Predicate<Throwable> exceptionPredicate = exception -> (exception instanceof SQLRecoverableException || exception instanceof SQLTransientConnectionException || exception instanceof TransientDataAccessException);
+
 	@PostConstruct
 	public void init() {
 		this.setExceptionClassifier(cause -> {
 			do {
-				// SQLTransientConnectionException: (08001)|(08003)
-				// - intermittent issues because of a backend failure like connection refused
-				// - hikari connection time out
-				// - 08001, 08003 - connection does not exist (pool connection timeout)
-				if (cause instanceof SQLRecoverableException || cause instanceof SQLTransientConnectionException ||
-						cause instanceof TransientDataAccessException) {
-					return sp;
-				}
-				else if (cause instanceof SQLException exception && (sqlStatePredicate.or(sqlMsgPredicate)
-						.test(exception))) {
+				if (exceptionPredicate.test(cause) || (cause instanceof SQLException exception && (sqlStatePredicate.or(sqlMsgPredicate)
+						.test(exception)))) {
 					return sp;
 				}
 				cause = cause.getCause();
