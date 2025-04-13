@@ -19,4 +19,6 @@ public interface ITodoService {
 
 	void deleteById(UUID id);
 
+	List<Todo> getTodosByStatus(boolean status);
+
 }

@@ -1,16 +1,15 @@
 package io.mservice.todo;
 
+import com.yugabyte.PGProperty;
+import com.yugabyte.util.PGobject;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.yugabyte.PGProperty;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import org.hibernate.boot.model.relational.ColumnOrderingStrategyStandard;
-import com.yugabyte.util.PGobject;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 
@@ -18,9 +17,11 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.data.domain.Sort;
@@ -59,9 +60,23 @@ public class TodoApplication {
 		RetryTemplate retryTemplate = new RetryTemplate();
 		ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
 		backOffPolicy.setMaxInterval(5000); // in seconds (just a reference; needs to be updated as per the need)
+		backOffPolicy.setInitialInterval(200);
+		backOffPolicy.setMultiplier(3);
 		retryTemplate.setRetryPolicy(todoRetryPolicy);
 		retryTemplate.setBackOffPolicy(backOffPolicy);
 		return retryTemplate;
+	}
+
+	@Bean
+	public HintStatementInspector hintStatementInspector(@Value("${spring.jpa.properties.hibernate.use_sql_comments:false}") String comment) {
+		return new HintStatementInspector(Boolean.parseBoolean(comment));
+	}
+
+	@Bean
+	public HibernatePropertiesCustomizer hibernatePropsCustomizer(HintStatementInspector inspector) {
+		return hibernateProperties -> {
+			hibernateProperties.put("hibernate.session_factory.statement_inspector", inspector);
+		};
 	}
 
 	@Bean
@@ -95,46 +110,50 @@ public class TodoApplication {
 			@RouterOperation(path = "/v1/todo/{id}", beanClass = TodoService.class, beanMethod = "findById",
 					method = RequestMethod.GET,
 					operation = @Operation(operationId = "findById",
-							parameters = { @Parameter(in = PATH, name = "id", description = "todo-id to find") })),
+							parameters = {@Parameter(in = PATH, name = "id", description = "todo-id to find")})),
 			@RouterOperation(path = "/v1/todo", beanClass = TodoService.class, beanMethod = "save",
-					method = { POST, PUT }),
+					method = {POST, PUT}),
 			@RouterOperation(path = "/v1/todo/{id}", beanClass = TodoService.class, beanMethod = "deleteById",
 					method = DELETE,
 					operation = @Operation(operationId = "deleteById",
-							parameters = { @Parameter(in = PATH, name = "id", description = "todo-id to delete") })) })
+							parameters = {@Parameter(in = PATH, name = "id", description = "todo-id to delete")}))})
 	@Bean
 	RouterFunction<ServerResponse> routeHandler(ITodoService todoService, RetryTemplate retryTemplate) {
 		return RouterFunctions.route().path("/v1/todo", builder -> builder.GET("/{id}", req -> {
-			Optional<Todo> todo = retryTemplate
-					.execute(context -> todoService.findById(UUID.fromString(req.pathVariable("id"))));
-			return status(todo.isPresent() ? OK : NOT_FOUND).contentType(APPLICATION_JSON).body(todo);
-		}).POST(req -> {
-			Todo todo = req.body(Todo.class);
-			return created(new URI("/v1/todo")).contentType(APPLICATION_JSON)
-					.body(retryTemplate.execute(context -> todoService.save(todo)));
-		}).PUT(req -> {
-			Todo todo = req.body(Todo.class);
-			return (todo.getId() == null) ? status(BAD_REQUEST).contentType(TEXT_PLAIN).body("Todo id is empty")
-					: ok().contentType(APPLICATION_JSON).body(retryTemplate.execute(context -> todoService.save(todo)));
-		}).DELETE("/{id}", req -> {
-			todoService.deleteById(UUID.fromString(req.pathVariable("id")));
-			return ok().build();
-		}).GET("/page/{limit}",
-				req -> ok().contentType(APPLICATION_JSON)
-						.body(retryTemplate.execute(
-								context -> todoService.findByLimit(Integer.parseInt(req.pathVariable("limit"))))))
-				.GET(req -> ok().contentType(APPLICATION_JSON)
-						.body(retryTemplate
-								.execute(context -> todoService.findAllBySort(Sort.by(Sort.Direction.DESC, "id"))))))
+							Optional<Todo> todo = retryTemplate
+									.execute(context -> todoService.findById(UUID.fromString(req.pathVariable("id"))));
+							return status(todo.isPresent() ? OK : NOT_FOUND).contentType(APPLICATION_JSON).body(todo);
+						}).POST(req -> {
+							Todo todo = req.body(Todo.class);
+							return created(new URI("/v1/todo")).contentType(APPLICATION_JSON)
+									.body(retryTemplate.execute(context -> todoService.save(todo)));
+						}).PUT(req -> {
+							Todo todo = req.body(Todo.class);
+							return (todo.getId() == null) ? status(BAD_REQUEST).contentType(TEXT_PLAIN).body("Todo id is empty")
+									: ok().contentType(APPLICATION_JSON).body(retryTemplate.execute(context -> todoService.save(todo)));
+						}).DELETE("/{id}", req -> {
+							todoService.deleteById(UUID.fromString(req.pathVariable("id")));
+							return ok().build();
+						}).GET("/page/{limit}",
+								req -> ok().contentType(APPLICATION_JSON)
+										.body(retryTemplate.execute(
+												context -> todoService.findByLimit(Integer.parseInt(req.pathVariable("limit"))))))
+						.GET("/list/{status}",
+								req -> ok().contentType(APPLICATION_JSON)
+										.body(retryTemplate.execute(
+												context -> todoService.getTodosByStatus(Boolean.parseBoolean(req.pathVariable("status"))))))
+						.GET(req -> ok().contentType(APPLICATION_JSON)
+								.body(retryTemplate
+										.execute(context -> todoService.findAllBySort(Sort.by(Sort.Direction.DESC, "id"))))))
 				.build();
 	}
 
 	static class TodoRuntimeHints implements RuntimeHintsRegistrar {
 
 		private static final String[] REFLECTION_CLS_NAME = {
-				"org.springframework.core.annotation.TypeMappedAnnotation[]", "java.util.UUID[]" };
+				"org.springframework.core.annotation.TypeMappedAnnotation[]", "java.util.UUID[]"};
 
-		private static final Class<?>[] REFLECTION_CLS = { PGobject.class, ColumnOrderingStrategyStandard.class };
+		private static final Class<?>[] REFLECTION_CLS = {PGobject.class, ColumnOrderingStrategyStandard.class};
 
 		@Override
 		public void registerHints(final RuntimeHints hints, final ClassLoader classLoader) {

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import jakarta.annotation.PostConstruct;
+import org.hibernate.TransactionException;
 
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.retry.RetryPolicy;
@@ -27,7 +28,7 @@ public class TodoRetryPolicy extends ExceptionClassifierRetryPolicy {
 	private final String SQL_STATE = "^(40001)|(40P01)|(57P01)|(08006)";
 
 	// oom-killer or a process crash in the middle of a tx
-	private final String SQL_MSG = "^(connection is closed)";
+	private final String SQL_MSG = "^(connection is closed)|(connection reset by peer)";
 
 	// XX000 shouldn't be re-tried. Retry it only when the state and msg matches
 	private final Map<String, String> errorCodes = Map.of("XX000", "schema version mismatch");
@@ -50,7 +51,11 @@ public class TodoRetryPolicy extends ExceptionClassifierRetryPolicy {
 	// - intermittent issues because of a backend failure like connection refused
 	// - hikari connection time out
 	// - 08001, 08003 - connection does not exist (pool connection timeout)
-	private final Predicate<Throwable> exceptionPredicate = exception -> (exception instanceof SQLRecoverableException || exception instanceof SQLTransientConnectionException || exception instanceof TransientDataAccessException);
+	// TransactionException
+	// - begin, commit, rollback failures
+	private final Predicate<Throwable> exceptionPredicate = exception -> (exception instanceof SQLRecoverableException
+			|| exception instanceof SQLTransientConnectionException || exception instanceof TransientDataAccessException
+			|| exception instanceof TransactionException);
 
 	@PostConstruct
 	public void init() {

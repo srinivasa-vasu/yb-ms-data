@@ -8,11 +8,14 @@ spring:
     default-schema: stodo
     schemas: stodo,public
     table: schema_history_${region}
+#    init-sqls: "SET yb_non_ddl_txn_for_sys_tables_allowed = true"
     placeholders:
       alt_region: ${alt_region}
   jpa:
     properties:
       hibernate:
+#        session_factory:
+#          statement_inspector: io.mservice.todo.HintStatementInspector
         connection:
           provider_disables_autocommit: true
         default_schema: stodo
@@ -20,20 +23,22 @@ spring:
           extra_physical_table_types: "PARTITIONED TABLE"
           auto: validate
         dialect: org.hibernate.community.dialect.PostgreSQLLegacyDialect
+#        use_sql_comments: true
     open-in-view: false
   datasource:
     hikari:
       minimum-idle: 3
       maximum-pool-size: 3
       auto-commit: false
-      keepalive-time: 30000
+      keepalive-time: 120000
       connection-init-sql: "set yb_silence_advisory_locks_not_supported_error=on; set search_path=stodo,public; prepare warmup as SELECT 1; execute warmup; commit;"
       connection-timeout: 5000
       data-source-properties:
         ApplicationName: yb-ms-data
         socketTimeout: 15
+        yb-servers-refresh-interval: 180
 #      validation-timeout: 2000
-#      max-lifetime: 120000
+#      max-lifetime: 300000
 server:
   port: 8080
 

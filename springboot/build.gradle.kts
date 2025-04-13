@@ -2,11 +2,11 @@
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-    id("org.springframework.boot") version "3.3.3"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.4.2"
+    id("io.spring.dependency-management") version "1.1.7"
     id("java")
 //    id("org.hibernate.orm") version "6.6.0.Final"
-    id("org.graalvm.buildtools.native") version "0.10.2"
+    id("org.graalvm.buildtools.native") version "0.10.4"
 }
 
 group = "io.mservice.boot"
@@ -37,7 +37,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.retry:spring-retry")
-    implementation("com.yugabyte:jdbc-yugabytedb:42.3.5-yb-6")
+    implementation("com.yugabyte:jdbc-yugabytedb:42.7.3-yb-3")
 //    implementation("org.postgresql:postgresql:42.7.4")
     implementation("org.hibernate.orm:hibernate-community-dialects")
 
@@ -53,6 +53,8 @@ dependencies {
     testImplementation("org.flywaydb.flyway-test-extensions:flyway-spring-test:10.0.0")
     testImplementation("org.testcontainers:yugabytedb")
     testImplementation("org.testcontainers:junit-jupiter")
+
+    runtimeOnly("org.slf4j:jul-to-slf4j")
 }
 
 dependencyManagement {
