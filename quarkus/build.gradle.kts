@@ -1,6 +1,6 @@
 plugins {
     java
-    id("io.quarkus") version "3.14.1"
+    id("io.quarkus") version "3.17.2"
 }
 
 repositories {
@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:3.14.1"))
+    implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:3.17.2"))
     implementation("io.quarkus:quarkus-hibernate-orm")
     implementation("io.quarkus:quarkus-flyway")
     implementation("io.quarkus:quarkus-resteasy")
@@ -18,7 +18,7 @@ dependencies {
     implementation("io.quarkus:quarkus-agroal")
     implementation("io.quarkus:quarkus-smallrye-fault-tolerance")
 
-    implementation("com.yugabyte:jdbc-yugabytedb:42.3.5-yb-6")
+    implementation("com.yugabyte:jdbc-yugabytedb:42.7.3-yb-1")
     implementation("org.postgresql:postgresql:42.7.4")
 
     testImplementation("io.quarkus:quarkus-junit5")
